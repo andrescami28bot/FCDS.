@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quién quiere ser millonario?</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('MILLOS.jpg'); /* Cambiado a la imagen */
+            background-size: cover;
+            text-align: center;
+            margin: 20px;
+        }
+        #quiz-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            position: relative;
+            width: 600px;
+            margin: auto;
+        }
+        .logo {
+            width: 40%;
+            max-width: 240px;
+            margin-bottom: 20px;
+        }
+        .sena-logo {
+            width: 300px; /* Aumentado */
+            position: absolute;
+            top: 10px;
+            right: -300px; /* Corregido para desplazar más a la derecha */
+        }
+        .left-logo {
+            width: 120px; /* Aumentado */
+            position: absolute;
+            top: 10px;
+            left: -150px; /* Corregido para desplazar más a la izquierda */
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 20px;
+            background-color: #e0e0e0;
+        }
+        .answer {
+            background: #007BFF;
+            color: white;
+            padding: 8px;
+            border-radius: 20px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 16px;
+        }
+        .answer:hover {
+            background: #0056b3;
+        }
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        #score {
+            font-size: 18px;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: black;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <img src="https://www.antena3.com/newa3flash/modulos_blancos/qqsm/A3Quiz4/img/Logo_WWTBAM_Spain.png" alt="Logo" class="logo">
+        <img src="sena.png" alt="Logo SENA" class="sena-logo">
+        <img src="indalecio.png" alt="Logo Izquierda" class="left-logo">
+        <div id="score">Puntos: 0</div>
+        <div class="question" id="question"></div>
+        <div id="answers"></div>
+        <button id="next" style="display: none;">Siguiente</button>
+        <button id="restart" style="display: none;">Reiniciar Juego</button>
+        <button id="finish" style="display: none;">Finalizar Juego</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es la capital de Francia?",
+                answers: ["Berlín", "Madrid", "París", "Lisboa"],
+                correct: 2,
+                points: 100
+            },
+            {
+                question: "¿Quién escribió 'Cien años de soledad'?",
+                answers: ["Gabriel García Márquez", "Jorge Luis Borges", "Mario Vargas Llosa", "Pablo Neruda"],
+                correct: 0,
+                points: 100
+            },
+            {
+                question: "¿Qué planeta es conocido como el Planeta Rojo?",
+                answers: ["Tierra", "Marte", "Júpiter", "Saturno"],
+                correct: 1,
+                points: 100
+            },
+            {
+                question: "¿Qué es la fotosíntesis?",
+                answers: ["Un proceso de respiración", "Un proceso de producción de alimentos en plantas", "Un tipo de energía", "Un fenómeno atmosférico"],
+                correct: 1,
+                points: 100
+            },
+            {
+                question: "¿En qué año llegó el hombre a la Luna?",
+                answers: ["1965", "1969", "1971", "1975"],
+                correct: 1,
+                points: 100
+            },
+            {            
+                question: "¿Dónde se encuentra actualmente La Mona Lisa?",
+                answers: ["Museo del Louvre en París", "Museo Mertrpolitano de Arte Nueva York", "Museo Británico Londres", "Galeríá Uffizi Florencia Italia"],
+                correct: 0,
+                points: 100
+            },
+            { 
+                question: "¿Cuál es el pasado del verbo to have?",
+                answers: ["Haves", "Had", "having", "Hadded"], 
+                correct: 1,
+                points: 100
+            }, 
+            {     
+                question: "¿Qué energia se obtiene apartir del movimiento del viento",
+                answers: ["Energía Solar", "Energía Nuclear", "Energía Eólica", "Energía Hidráulica"],
+                correct: 2,
+                points: 100
+            },          
+            {
+                question: "Quién fue conocido como el Libertador de América del Sur",
+                answers: ["Simón Bolívar", "José de San Martín", "Francisco de Miranda", "Miguel Hidalgo"],
+                correct: 0,
+                points: 100
+            },
+            {
+                question: "¿En qué año comenzó la Primera Guerra Mundial?",
+                answers: ["1914", "1939", "1918", "1945"],
+                correct: 0,
+                points: 100
+            },
+            {         
+                question: "¿Qué empresa desarrolló el sistema operativo Andrid",
+                answers: ["Microsoft", "Apple", "Google", "IBM"],
+                correct: 2,
+                points: 100
+            },
+            {
+                question: "¿Qué tipo de planta utilizó Gregor Mendel para sus experimentos sobre la herencia genéticas?",
+                answers: ["Trigo", "Maíz", "Guisantes", "Rosas"],
+                correct: 2,
+                points: 100
+            },
+            {
+                question: "¿Qué movimiento artístico surgió a finales del siglo XIX y se caracteriza por el uso de luz y color?",
+                answers: ["Barroco", "Realismo", "Impresionismo", "Romantisismo" ],
+                correct: 2,
+                points: 100
+            }, 
+            {       
+                question: "¿Qué componente principal de una computadora se conoce como el cerebro?", 
+                answers: ["Monitor", "Tarjeta de video", "Disco duro", "Procesador CPU"],
+                correct: 3,
+                points: 100
+            },
+            { 
+                question: "¿Qué significa la palabra library?",
+                answers: ["Laboratorio", "Bliblioteca", "libro", "Librería"],
+                correct: 1,
+                points: 100
+            },
+            {      
+                question: "¿Qué país fue el primero en enviar un ser humano al espacio?",
+                answers: ["Rusia", "Estados Unidos", "Francia", "China"],
+                correct: 0,
+                points: 100
+            },
+            {
+                question: "¿Cuál es perímetro de un cuadr  de 5 cm?",
+                answers: ["25cm", "15", "30", "20"],
+                correct: 3,
+                points: 100
+            },
+            {
+                question: "¿A cuánto equivale el radio de un círculo?",
+                answers: ["doble del diámetro", "Mitad del diámetro", "Perímetro del círculo", "Área del círculo"],
+                correct: 1,
+                points: 100
+            },
+            {
+                question: "¿Quién fue el creador de la primera tabla periódica de los elementos?",
+                answers: ["Marie Curie", "John Dalton", "Dmitri Mendeléyevado", " Antoine Lavoisier"],
+                correct: 2,
+                points: 100
+            },
+            {
+                question: "¿Cuál es el plural de child?",
+                answers: ["Childs", "Children", "Childes", "Childer"],
+                correct: 1,
+                points: 100
+            },
+        ];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        shuffle(questions);
+
+        let currentQuestion = 0;
+        let score = 0;
+        const questionElement = document.getElementById("question");
+        const answersElement = document.getElementById("answers");
+        const resultElement = document.getElementById("result");
+        const nextButton = document.getElementById("next");
+        const restartButton = document.getElementById("restart");
+        const finishButton = document.getElementById("finish");
+        const scoreElement = document.getElementById("score");
+
+        function showQuestion() {
+            const current = questions[currentQuestion];
+            questionElement.textContent = current.question;
+            answersElement.innerHTML = "";
+
+            current.answers.forEach((answer, index) => {
+                const button = document.createElement("div");
+                button.textContent = answer;
+                button.classList.add("answer");
+                button.addEventListener("click", () => selectAnswer(index));
+                answersElement.appendChild(button);
+            });
+
+            nextButton.style.display = "none";
+            restartButton.style.display = "none";
+            finishButton.style.display = "none";
+            resultElement.textContent = "";
+        }
+
+        function selectAnswer(index) {
+            const current = questions[currentQuestion];
+            if (index === current.correct) {
+                resultElement.textContent = "¡Correcto!";
+                score += current.points;
+            } else {
+                resultElement.textContent = "Incorrecto. La respuesta correcta era: " + current.answers[current.correct];
+            }
+            scoreElement.textContent = "Puntos: " + score;
+            nextButton.style.display = "block";
+
+            const answers = document.querySelectorAll(".answer");
+            answers.forEach((answer) => {
+                answer.removeEventListener("click", () => selectAnswer(index));
+                answer.style.pointerEvents = "none";
+                answer.style.opacity = 0.5;
+            });
+        }
+
+        nextButton.addEventListener("click", () => {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                questionElement.textContent = "¡Has completado el juego!";
+                answersElement.innerHTML = "";
+                nextButton.style.display = "none";
+                restartButton.style.display = "block";
+                finishButton.style.display = "block";
+            }
+        });
+
+        restartButton.addEventListener("click", () => {
+            currentQuestion = 0;
+            score = 0;
+            scoreElement.textContent = "Puntos: 0";
+            shuffle(questions);
+            showQuestion();
+            restartButton.style.display = "none";
+            finishButton.style.display = "none";
+        });
+
+        finishButton.addEventListener("click", () => {
+            window.location.href = "index.html"; // Redirigir a index.html
+        });
+
+        showQuestion();
+    </script>
+</body>
+</html>

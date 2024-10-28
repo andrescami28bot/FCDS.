@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong - Juego con Preguntas</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('PIN\ .jpg') no-repeat center center fixed;
+            background-size: cover; /* Asegura que la imagen cubra todo el fondo */
+        }
+        h1, p {
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        #logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        #logo-container img {
+            width: 80px; /* Tamaño del logo */
+            height: auto;
+            margin: 0 10px;
+        }
+        #game {
+            position: relative;
+            width: 600px;  
+            height: 400px; 
+            background-color: #000; /* Tablero negro */
+            border: 2px solid white;
+        }
+        .paddle {
+            position: absolute;
+            width: 10px; /* Tamaño modificado */
+            height: 80px; /* Tamaño modificado */
+            background-color: white;
+        }
+        .paddle.left {
+            left: 0;
+        }
+        .paddle.right {
+            right: 0;
+        }
+        .ball {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 24px;
+        }
+        #question-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border-radius: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        #question {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        #answer-input {
+            margin-bottom: 10px;
+        }
+        #feedback {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        #end-game-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border-radius: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        #end-game-message {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        #restart-button, #finish-button {
+            margin-top: 10px;
+        }
+        .center-line {
+            position: absolute;
+            width: 2px;
+            height: 400px; 
+            background-color: white;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .center-circle {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: transparent;
+            border: 2px solid white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div id="logo-container">
+        <img src="logo.png" alt="Logo Izquierdo">
+        <h1>Pong - Juego con Preguntas</h1>
+        <img src="logo.png" alt="Logo Derecho">
+    </div>
+    <p>¡Bienvenido a Pong con Preguntas! Compite contra un amigo mientras juegan al clásico Pong. Cada vez que aumentes 3 puntos, tendrás que responder una pregunta. ¡Demuestra tus habilidades y elige sabiamente!</p>
+    <div id="game">
+        <div id="score">0 : 0</div>
+        <div class="paddle left"></div>
+        <div class="paddle right"></div>
+        <div class="ball"></div>
+        <div class="center-line"></div>
+        <div class="center-circle"></div>
+        <div id="question-box">
+            <div id="question"></div>
+            <input type="text" id="answer-input" placeholder="Escribe tu respuesta aquí" />
+            <button id="submit-answer">Responder</button>
+            <div id="feedback"></div>
+            <button id="close-feedback" style="display:none;">Aceptar</button>
+        </div>
+        <div id="end-game-box">
+            <div id="end-game-message"></div>
+            <button id="restart-button">Reiniciar</button>
+            <button id="finish-button">Finalizar</button>
+        </div>
+    </div>
+
+    <script>
+        const game = document.getElementById('game');
+        const leftPaddle = document.querySelector('.paddle.left');
+        const rightPaddle = document.querySelector('.paddle.right');
+        const ball = document.querySelector('.ball');
+        const scoreDisplay = document.getElementById('score');
+        const questionBox = document.getElementById('question-box');
+        const questionText = document.getElementById('question');
+        const answerInput = document.getElementById('answer-input');
+        const submitAnswerBtn = document.getElementById('submit-answer');
+        const feedback = document.getElementById('feedback');
+        const closeFeedbackBtn = document.getElementById('close-feedback');
+        const endGameBox = document.getElementById('end-game-box');
+        const endGameMessage = document.getElementById('end-game-message');
+        const restartButton = document.getElementById('restart-button');
+        const finishButton = document.getElementById('finish-button');
+
+        let leftPaddleY = 150;  
+        let rightPaddleY = 150; 
+        let ballX = 290, ballY = 190; 
+        let ballSpeedX = 5, ballSpeedY = 5; 
+        let leftScore = 0, rightScore = 0;
+        const paddleSpeed = 5; 
+        const questionMilestones = [3, 6, 9, 12];
+        const targetScore = 12;
+        let currentQuestionMilestone = null;
+        let gamePaused = false;
+        let playerAnswering = null; // Almacena a qué jugador se le hace la pregunta
+        let askedQuestions = [];
+        let askedMilestones = { left: [], right: [] };
+
+        const questions = [
+            { question: "¿Cuál es el país más grande del mundo?", answer: "Rusia" },
+            { question: "¿Quién escribió 'Don Quijote de la Mancha'?", answer: "Miguel de Cervantes" },
+            { question: "¿En qué año llegó el hombre a la Luna?", answer: "1969" },
+            { question: "¿Cuál es la capital de Japón?", answer: "Tokyo" },
+            { question: "¿Qué planeta es conocido como el planeta rojo?", answer: "MarSSSte" },
+            { question: "¿Cuál es el océano más grande del mundo? ", answer: "Pacífico" },
+            { question: "¿Cuál es el pasado simple del verbo 'to be'?", answer: "was,were" },
+            { question: "¿Cuál es la montaña más alta del mundo?", answer: "Everest" },
+            { question: "¿En qué siglos se desarrolló el Renacimiento?", answer: "siglos XIV y XVI" },
+            { question: "¿Cuál es el país más pequeño del mundo?", answer: "Ciudad del Vaticano" },
+            { question: "¿En qué año cayó el Muro de Berlín?", answer: "1989" },
+            { question: "¿En qué continente se encuentra el Amazonas?", answer: "América del sur" },
+            { question: "¿Cuál es el país más poblado del mundo?", answer: "China" },
+            { question: "¿Cuál es el pasado simple del verbo to eat?", answe: "ate" },
+            
+        ];
+
+        function resetBall() {
+            ballX = 290; 
+            ballY = 190; 
+            ballSpeedX = -ballSpeedX;
+        }
+
+        function update() {
+            if (!gamePaused) {
+                ballX += ballSpeedX;
+                ballY += ballSpeedY;
+
+                if (ballY <= 0 || ballY >= 380) {
+                    ballSpeedY = -ballSpeedY;
+                }
+
+                if (ballX <= 10 && ballY >= leftPaddleY && ballY <= leftPaddleY + 80) {
+                    ballSpeedX = -ballSpeedX;
+                }
+
+                if (ballX >= 590 && ballY >= rightPaddleY && ballY <= rightPaddleY + 80) {
+                    ballSpeedX = -ballSpeedX;
+                }
+
+                if (ballX <= 0) {
+                    rightScore++;
+                    scoreDisplay.innerText = `${leftScore} : ${rightScore}`;
+                    resetBall();
+                    checkForQuestion(rightScore, "right");
+                }
+
+                if (ballX >= 600) {
+                    leftScore++;
+                    scoreDisplay.innerText = `${leftScore} : ${rightScore}`;
+                    resetBall();
+                    checkForQuestion(leftScore, "left");
+                }
+
+                ball.style.left = `${ballX}px`;
+                ball.style.top = `${ballY}px`;
+            }
+        }
+
+        function movePaddles() {
+            if (!gamePaused) {
+                if (keysPressed['w'] && leftPaddleY > 0) {
+                    leftPaddleY -= paddleSpeed;
+                }
+                if (keysPressed['s'] && leftPaddleY < 320) {
+                    leftPaddleY += paddleSpeed;
+                }
+                if (keysPressed['ArrowUp'] && rightPaddleY > 0) {
+                    rightPaddleY -= paddleSpeed;
+                }
+                if (keysPressed['ArrowDown'] && rightPaddleY < 320) {
+                    rightPaddleY += paddleSpeed;
+                }
+
+                leftPaddle.style.top = `${leftPaddleY}px`;
+                rightPaddle.style.top = `${rightPaddleY}px`;
+            }
+        }
+
+        const keysPressed = {};
+
+        window.addEventListener('keydown', function(event) {
+            keysPressed[event.key] = true;
+        });
+
+        window.addEventListener('keyup', function(event) {
+            keysPressed[event.key] = false;
+        });
+
+        function checkForQuestion(score, player) {
+            if (questionMilestones.includes(score) && !askedMilestones[player].includes(score)) {
+                askedMilestones[player].push(score);
+                playerAnswering = player; // Almacena a qué jugador se le hace la pregunta
+                askQuestion();
+            }
+            if (score === targetScore) {
+                endGame(`${player === "left" ? "Derecha" : "Izquierda"} ha ganado el juego!`);
+            }
+        }
+
+        function askQuestion() {
+            const question = questions[Math.floor(Math.random() * questions.length)];
+            askedQuestions.push(question);
+            questionText.textContent = question.question;
+            answerInput.value = '';
+            feedback.textContent = '';
+            closeFeedbackBtn.style.display = 'none'; 
+            submitAnswerBtn.disabled = false; // Habilitar botón al preguntar
+            questionBox.style.display = 'flex';
+            gamePaused = true;
+        }
+
+        submitAnswerBtn.addEventListener('click', function() {
+            const answer = answerInput.value.trim();
+            const correctAnswer = questions.find(q => q.question === questionText.textContent).answer;
+
+            if (answer.toLowerCase() === correctAnswer.toLowerCase()) {
+                feedback.textContent = '¡Correcto!';
+            } else {
+                feedback.textContent = 'Incorrecto. La respuesta correcta es: ' + correctAnswer; // Mostrar la respuesta correcta
+                if (playerAnswering === "left" && leftScore > 0) {
+                    leftScore--; // Quitar un punto al jugador izquierdo
+                } else if (playerAnswering === "right" && rightScore > 0) {
+                    rightScore--; // Quitar un punto al jugador derecho
+                }
+                scoreDisplay.innerText = `${leftScore} : ${rightScore}`; // Actualizar el marcador
+            }
+            closeFeedbackBtn.style.display = 'block'; 
+            submitAnswerBtn.disabled = true; // Deshabilitar el botón después de responder
+        });
+
+        closeFeedbackBtn.addEventListener('click', function() {
+            questionBox.style.display = 'none';
+            gamePaused = false;
+            playerAnswering = null; // Reiniciar a quién le salió la pregunta
+        });
+
+        restartButton.addEventListener('click', function() {
+            leftScore = 0;
+            rightScore = 0;
+            scoreDisplay.innerText = '0 : 0';
+            resetBall();
+            endGameBox.style.display = 'none';
+            askedQuestions = [];
+            askedMilestones = { left: [], right: [] };
+            gamePaused = false;
+        });
+
+        finishButton.addEventListener('click', function() {
+            window.location.href = 'index.html'; // Redirigir a index.html
+        });
+
+        function endGame(message) {
+            endGameMessage.textContent = message;
+            endGameBox.style.display = 'flex';
+            gamePaused = true;
+        }
+
+        setInterval(function() {
+            update();
+            movePaddles();
+        }, 1000 / 60); // 60 FPS
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Intro</title>
+    <style>
+        /* Configuración del fondo y estilo de la página */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Permite que el botón esté debajo del video */
+            background-image: url('index.jpeg'); /* Fondo de la página */
+            background-size: cover; /* Asegura que la imagen cubra toda la pantalla */
+            background-position: center; /* Centra la imagen de fondo */
+        }
+        video {
+            width: 80%;  /* Ajusta el ancho del video */
+            height: auto; /* Mantiene la proporción del video */
+            max-height: 80%; /* Limita la altura máxima del video */
+            border: 2px solid white; /* Opción para añadir un borde blanco al video */
+            border-radius: 8px; /* Bordes redondeados opcionalmente */
+        }
+        button {
+            margin-top: 20px; /* Espacio entre el video y el botón */
+            padding: 10px 20px; /* Espacio en el botón */
+            font-size: 16px; /* Tamaño de fuente del botón */
+            cursor: pointer; /* Cambia el cursor al pasar por encima */
+        }
+    </style>
+</head>
+<body>
+    <video id="introVideo" preload="auto">
+        <source src="intro.mp4" type="video/mp4">
+        Tu navegador no soporta el video.
+    </video>
+    <button id="playButton">Iniciar</button>
+
+    <script>
+        const video = document.getElementById('introVideo');
+        const playButton = document.getElementById('playButton');
+
+        // Función para reproducir el video
+        playButton.addEventListener('click', function() {
+            video.play().then(() => {
+                playButton.style.display = 'none'; // Oculta el botón al reproducir
+            }).catch((error) => {
+                console.log('No se pudo reproducir el video:', error);
+            });
+        });
+
+        // Redirigir a index.html al finalizar el video
+        video.onended = function() {
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>

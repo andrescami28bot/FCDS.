@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Juego</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('index.jpeg'); /* Cambia el color de fondo por la imagen */
+            background-size: cover; /* Asegura que la imagen cubra toda el área */
+            background-position: center; /* Centra la imagen */
+            color: white;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            position: relative; /* Necesario para el posicionamiento absoluto de las imágenes */
+        }
+        #container {
+            text-align: center;
+            padding: 40px; /* Espaciado interno */
+            border-radius: 10px; /* Bordes redondeados */
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo negro semi-transparente del contenedor */
+            width: 700px; /* Ancho aumentado */
+            height: 500px; /* Altura aumentada */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); /* Sombra */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centra el contenido verticalmente */
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px 0; /* Margen vertical entre botones */
+            cursor: pointer;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .sena-logo {
+            position: absolute; /* Posiciona la imagen SENA */
+            top: 80px; /* Baja la imagen SENA */
+            right: 80px; /* Coloca a 80px del borde derecho */
+            width: 300px; /* Ajusta el tamaño de la imagen SENA */
+        }
+        .left-logo {
+            position: absolute; /* Posiciona la imagen a la izquierda */
+            top: 80px; /* Baja la imagen */
+            left: 80px; /* Coloca a 80px del borde izquierdo */
+            width: 150px; /* Ajusta el tamaño de la nueva imagen a la izquierda */
+        }
+        .description {
+            font-size: 16px;
+            margin: 10px 0; /* Espaciado vertical */
+            color: #ccc; /* Color de texto de la descripción */
+            text-align: left; /* Alinea el texto a la izquierda */
+        }
+    </style>
+</head>
+<body>
+    <img src="sena.png" alt="Logo SENA" class="sena-logo"> <!-- Logo SENA a la derecha -->
+    <img src="indalecio.png" alt="Logo Izquierda" class="left-logo"> <!-- Nueva imagen a la izquierda -->
+    
+    <div id="container">
+        <h2>Descubre y Aprende: Un Viaje por la Cultura General</h2>
+        <p class="description">¡Bienvenido a nuestra serie de juegos de cultura general! El objetivo de estos juegos es desafiar tus conocimientos mientras te sumerges en fascinantes temas de historia, ciencia, arte y más. A medida que avanzas, podrás aprender datos curiosos, mejorar tu memoria y ampliar tu visión del mundo. ¡Prepárate para poner a prueba tus habilidades y convertirte en un experto en cultura general de manera divertida!</p>
+        <h1>Selecciona un Juego</h1>
+        <button onclick="location.href='snake.html'">Juego de la Serpiente</button>
+        <button onclick="location.href='pong.html'">Juego de Ping Pong</button>
+        <button onclick="location.href='millonario.html'">¿Quién quiere ser millonario?</button>
+        <button onclick="location.href='dino.html'">Juego del Dinosaurio</button> <!-- Nuevo botón agregado -->
+    </div>
+</body>
+</html>

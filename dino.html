@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego del Dinosaurio</title>
+    <style>
+       body {
+   	 margin: 0;
+    	overflow: hidden;
+    	background-image: url('tt.jpg'); /* Cambiar a la imagen de fondo */
+    	background-size: cover; /* Ajustar la imagen para cubrir todo el fondo */
+    	display: flex;
+    	flex-direction: column;
+    	align-items: center;
+    	justify-content: center;
+    	height: 100vh;
+    	font-family: Arial, sans-serif;
+	}
+        #titleContainer {
+	    color: white;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #titleContainer img {
+            width: 80px; /* Aumentar el tamaño de la imagen */
+            height: 80px; /* Aumentar el tamaño de la imagen */
+            margin: 0 10px; /* Espacio entre la imagen y el título */
+        }
+        h1 {
+            font-size: 32px; /* Aumentar el tamaño del texto del título */
+            margin: 0; /* Eliminar margen del título */
+        }
+        canvas {
+            display: block;
+            background-color: #0f0d0d6c; /* Fondo del canvas en blanco */
+            width: 800px; /* Aumentar el ancho del canvas */
+            height: 200px; /* Aumentar la altura del canvas */
+        }
+        #description {
+            font-size: 16px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        #restartBtn, #endBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: none; /* Ocultar los botones inicialmente */
+        }
+    </style>
+</head>
+<body>
+    <div id="titleContainer">
+        <img src="logo.png" alt="Logo Izquierda">
+        <h1>Juego del Dinosaurio</h1>
+        <img src="logo.png" alt="Logo Derecha">
+    </div>
+    <div id="description">¡Salta y evita los cactus mientras acumulas puntos!</div>
+    <canvas id="gameCanvas" width="800" height="200"></canvas> <!-- Ajustar dimensiones del canvas -->
+    <button id="restartBtn" onclick="restartGame()">Reiniciar Juego</button>
+    <button id="endBtn" onclick="endGame()">Finalizar</button>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const dinoImage = new Image();
+        dinoImage.src = 'dino.png'; // Asegúrate de que la imagen esté en la misma carpeta
+
+        const cactusImage = new Image();
+        cactusImage.src = 'captus.png'; // Asegúrate de que la imagen esté en la misma carpeta
+
+        const dino = {
+            x: 50,
+            y: canvas.height - 60, // Ajustar la posición Y del dino
+            width: 40,
+            height: 40,
+            gravity: 0.98,
+            jumpPower: -12,
+            velocityY: 0,
+            isJumping: false
+        };
+
+        const cactusArray = [];
+        let score = 0;
+        let gameInterval;
+        let cactusInterval;
+        let cactusSpeed = 5; // Velocidad inicial de los cactus
+
+        const questions = [
+            { question: "¿Cuál es la capital de Francia?", answer: "Paris" },
+            { question: "¿En qué año llegó el hombre a la luna?", answer: "1969" },
+            { question: "¿Quién pintó la Mona Lisa?", answer: "Leonardo da Vinci" },
+            { question: "¿Cuál es el río más largo del mundo?", answer: "Nilo" },
+            { question: "¿Cuál es la nacionalidad de Pablo Picasso?", answer: "Española" },
+            { question: "¿Cuál es el planeta más grande del sistema solar?", answer: "Júpiter" },
+            { question: "Cuál es el organo más grande del cuerpo humano?", answer: "Piel" },
+            { question: "¿Que es el ADN?", answer: "Molecula que contiene información genética" },
+            { question: "¿Cuál es el país de origen del idioma inglés?", answer: "Inglaterra" }, 
+            { question: "¿Cuál es la unidad de medida de la energía?", answer: "Julio" },
+            { question: "¿Quién inventó la bombilla eléctrica?", answer: "Thomas Edison" },
+            { question: "¿Cuál es la función de un router?", answer: "Conectar varias redes informáticas" },
+            { question: "¿Quién descubrió América?", answer: "Cristóbal Colón" },
+            { question: "¿En qué año se descubrió América?", answer: "1492" },
+            { question: "¿Cuál es la fórmula química del agua?", answer: "H₂O" },
+            { question: "¿Cuál es el planeta más cercano al Sol?", answer: "Mercurio" },
+        ];
+
+        function drawDino() {
+            ctx.drawImage(dinoImage, dino.x, dino.y, dino.width, dino.height);
+        }
+
+        function drawCactus(cactus) {
+            ctx.drawImage(cactusImage, cactus.x, cactus.y, cactus.width, cactus.height);
+        }
+
+        function drawScore() {
+            ctx.fillStyle = '#FFFFFF'; // Color del texto de puntuación
+            ctx.font = '20px Arial';
+            ctx.fillText('Puntuación: ' + score, 10, 20);
+        }
+
+        function jump() {
+            if (!dino.isJumping) {
+                dino.velocityY = dino.jumpPower;
+                dino.isJumping = true;
+            }
+        }
+
+        function update() {
+            dino.y += dino.velocityY;
+            dino.velocityY += dino.gravity;
+
+            if (dino.y > canvas.height - dino.height) {
+                dino.y = canvas.height - dino.height;
+                dino.isJumping = false;
+                dino.velocityY = 0;
+            }
+
+            // Actualizar posición de los cactus
+            for (let i = 0; i < cactusArray.length; i++) {
+                cactusArray[i].x -= cactusArray[i].speed;
+
+                if (cactusArray[i].x < -cactusArray[i].width) {
+                    cactusArray.splice(i, 1);
+                    score++;
+                    i--; // Ajustar el índice después de eliminar
+                    increaseSpeed(); // Aumentar la velocidad si corresponde
+                }
+
+                if (collision(dino, cactusArray[i])) {
+                    clearInterval(gameInterval);
+                    clearInterval(cactusInterval);
+                    askQuestion();
+                }
+            }
+        }
+
+        function increaseSpeed() {
+            if (score % 20 === 0) {
+                cactusSpeed += 1; // Aumentar la velocidad de los cactus
+            }
+        }
+
+        function collision(dino, cactus) {
+            return !(dino.x + dino.width < cactus.x || 
+                     dino.x > cactus.x + cactus.width || 
+                     dino.y + dino.height < cactus.y || 
+                     dino.y > cactus.y + cactus.height);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawDino();
+            for (const cactus of cactusArray) {
+                drawCactus(cactus);
+            }
+            drawScore();
+            update();
+        }
+
+        function startGame() {
+            score = 0;
+            cactusArray.length = 0; // Limpiar el array de cactus
+            cactusSpeed = 5; // Reiniciar la velocidad de los cactus
+            gameInterval = setInterval(draw, 20);
+            cactusInterval = setInterval(spawnCactus, 1000); // Generar cactus cada 1000 ms
+            document.getElementById('restartBtn').style.display = 'none'; // Ocultar botón de reiniciar
+            document.getElementById('endBtn').style.display = 'none'; // Ocultar botón de finalizar
+        }
+
+        function spawnCactus() {
+            const cactus = {
+                x: canvas.width,
+                y: canvas.height - 60, // Ajustar la posición Y del cactus
+
+                width: 30,
+                height: 50,
+                speed: cactusSpeed // Usar la velocidad actual
+            };
+            cactusArray.push(cactus);
+        }
+
+        function askQuestion() {
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            const question = questions[randomIndex];
+            const userAnswer = prompt(question.question);
+            if (userAnswer === question.answer) {
+                alert('¡Correcto! Tu puntuación final es: ' + score);
+            } else {
+                alert('Incorrecto. La respuesta correcta es: ' + question.answer + '. Tu puntuación final es: ' + score);
+            }
+            document.getElementById('restartBtn').style.display = 'block'; // Mostrar botón de reiniciar
+            document.getElementById('endBtn').style.display = 'block'; // Mostrar botón de finalizar
+        }
+
+        function restartGame() {
+            clearInterval(gameInterval);
+            clearInterval(cactusInterval);
+            startGame();
+        }
+
+        function endGame() {
+            window.location.href = 'index.html'; // Redirigir a index.html
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                jump();
+            }
+        });
+
+        startGame();
+    </script>
+</body>
+</html>
